@@ -6,10 +6,12 @@
 #include <opencv2/core/utils/logger.hpp>
 #include <spdlog/spdlog.h>
 #include <fmt/format.h>
+#include <chrono>
 
 #define DEFAULT_PIPELINE "gstreamer_pipeline.txt"
 #define DECKLINK_PIPELINE "decklink_pipeline.txt"
 
+std::atomic<bool> stopProgram(false);
 
 bool isValidNumber(const std::string &str);
 void parseArguments(int argc, char *argv[], std::string &inputName, int &cameraNumber);
@@ -35,26 +37,65 @@ int main(int argc, char *argv[])
         // Check if the input source is a video file or a camera.
         bool isFindSourceImage = findSourceImage(inputName, videoCapture, cameraNumber);
 
+
         if (!isFindSourceImage)
         {
             throw std::runtime_error("Failed to find source image");
         }
-        
+
         if (!videoCapture.isOpened()) 
         {
-            return EXIT_FAILURE;
+            cv::Mat image = cv::imread(inputName);
+            if (!image.empty()) 
+            {
+                cv::namedWindow("image", 0);
+                cv::imshow("image", image);
+                spdlog::info("Displaying image for 5 seconds...");
+                cv::waitKey(5000); // wait for 5 seconds
+                return EXIT_SUCCESS;
+            } 
+            else 
+            {
+                spdlog::error("Invalid input source: {}", inputName.c_str());
+                return EXIT_FAILURE;
+            }
         }
-
+        
         cv::Mat frame;
-        while (true) 
+        while (!stopProgram.load()) 
         {
+            // Measure time before reading frame
+            auto start_time = std::chrono::high_resolution_clock::now();
+
             if (!videoCapture.read(frame)) 
             {
-                spdlog::error("Unable to read frame from video capture");
+                if (videoCapture.get(cv::CAP_PROP_POS_FRAMES) >= videoCapture.get(cv::CAP_PROP_FRAME_COUNT)) 
+                {
+                    spdlog::info("Video playback completed.");
+                } 
+                else 
+                {
+                    spdlog::error("Unable to read frame from video capture");
+                }
                 break;
             }
 
+            // Measure time after reading frame
+            auto read_time = std::chrono::high_resolution_clock::now();
+
+            // Process and display image
             processAndDisplayImage(frame, writer);
+
+            // Measure time after processing frame
+            auto process_time = std::chrono::high_resolution_clock::now();
+
+            // Calculate elapsed times
+            auto read_duration = std::chrono::duration_cast<std::chrono::milliseconds>(read_time - start_time);
+            auto process_duration = std::chrono::duration_cast<std::chrono::milliseconds>(process_time - read_time);
+            auto total_duration = std::chrono::duration_cast<std::chrono::milliseconds>(process_time - start_time);
+
+            // Print timings
+            spdlog::info("Read time: {} ms, Process time: {} ms, Total time: {} ms", read_duration.count(), process_duration.count(), total_duration.count());
 
             if (cv::waitKey(30) >= 0) 
             {
@@ -159,7 +200,7 @@ void parseArguments(int argc, char *argv[], std::string &inputName, int &cameraN
         else 
         {
             spdlog::info("The video source is not an video file or image file.");
-            throw std::invalid_argument("Usage: " + std::string(argv[0]) + " <video file(.mp4)> ");
+            throw std::invalid_argument("Usage: " + std::string(argv[0]) + " <video file or image file> ");
         }
     } 
     else
