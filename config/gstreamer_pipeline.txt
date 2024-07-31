@@ -1,2 +1,2 @@
-decklinkvideosrc device-number=0 mode=25 ! videoconvert ! videocrop bottom=16 ! video/x-raw,format=BGR ! queue ! appsink max-buffers=1 drop=True
+videotestsrc pattern=ball ! videoconvert ! video/x-raw, format=BGR ! appsink
 
