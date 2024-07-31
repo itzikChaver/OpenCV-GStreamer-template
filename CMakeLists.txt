@@ -260,6 +260,7 @@ target_link_libraries(${PROJECT_N} PUBLIC -lpthread)
 
 list(APPEND src_files 
   ${CMAKE_CURRENT_SOURCE_DIR}/config/gstreamer_pipeline.txt  
+  ${CMAKE_CURRENT_SOURCE_DIR}/config/decklink_pipeline.txt
 )
                       
 # Copy CrSDK build artifacts after CrSDK's build step

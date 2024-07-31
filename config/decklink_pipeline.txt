@@ -1,0 +1,1 @@
+decklinkvideosrc device-number=$CAMERA_NUMBER$ mode=25 ! videoconvert ! videocrop bottom=16 ! video/x-raw,format=BGR ! queue ! appsink max-buffers=1 drop=True
