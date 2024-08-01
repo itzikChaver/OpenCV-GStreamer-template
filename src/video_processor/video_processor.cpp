@@ -26,11 +26,21 @@ void VideoProcessor::processVideo(cv::VideoCapture &videoCapture, cv::VideoWrite
 
         GlobalImage::updateImage(frame);
 
+        if(stopProgram.load())
+        {
+            break;
+        } 
+
         // Process and display image
         processAndDisplayImage(frame, writer);
 
         // Measure time after processing frame
         auto process_time = std::chrono::high_resolution_clock::now();
+
+        if(stopProgram.load())
+        {
+            break;
+        } 
 
         // Calculate elapsed times
         auto read_duration = std::chrono::duration_cast<std::chrono::milliseconds>(read_time - start_time);

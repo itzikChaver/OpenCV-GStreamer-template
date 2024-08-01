@@ -4,6 +4,7 @@
 #include <opencv2/core/utils/logger.hpp>
 #include <spdlog/spdlog.h>
 #include <chrono>
+#include <signal.h>
 
 #include "argument_parser/argument_parser.h"
 #include "pipeline_creator/pipeline_creator.h"
@@ -11,10 +12,18 @@
 
 std::atomic<bool> stopProgram(false);
 
+void signalHandler(int sig);
+
 int main(int argc, char *argv[]) 
 {
     try
     {
+        // Register signal handler for Ctrl+C
+        struct sigaction sa;
+        sa.sa_handler = signalHandler;
+        sigfillset(&sa.sa_mask);
+        sigaction(SIGINT, &sa, NULL);
+
         std::string inputName;
         int cameraNumber;
 
@@ -53,6 +62,8 @@ int main(int argc, char *argv[])
 
         VideoProcessor::processVideo(videoCapture, writer, stopProgram);
 
+        writer.release();
+        writer.~VideoWriter();
         videoCapture.~VideoCapture();
         spdlog::info("Resources cleaned up.");
         std::cout << "EXIT " << std::endl;
@@ -77,5 +88,23 @@ int main(int argc, char *argv[])
     {
         std::cout << "Resources cleaned up." << std::endl;
         return EXIT_FAILURE; 
+    }
+}
+
+/**
+ * @brief Signal handler for SIGINT.
+ *
+ * This function is called when the SIGINT signal is received (usually when the user presses Ctrl+C).
+ * It sets the `stopRequested` flag to true, which can be used to gracefully stop the program.
+ *
+ * @param sig The signal number (expected to be SIGINT).
+ */
+void signalHandler(int sig)
+{
+    if (sig == SIGINT)
+    {
+        std::cout << "" << std::endl;
+        spdlog::info("Program stopped...");
+        stopProgram.store(true);
     }
 }

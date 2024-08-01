@@ -96,12 +96,14 @@ The project is organized into several classes, each handling a specific part of 
 1. **ArgumentParser**: Handles parsing and validation of command-line arguments.
 2. **PipelineCreator**: Manages the creation of GStreamer pipelines for video capture.
 3. **VideoProcessor**: Processes video frames, including displaying and analyzing each frame.
+4. **VideoCapture**: Processes video capture, managing video capture.
 
 ### Header and Implementation Files
 
-- `ArgumentParser.h` and `ArgumentParser.cpp`
-- `PipelineCreator.h` and `PipelineCreator.cpp`
-- `VideoProcessor.h` and `VideoProcessor.cpp`
+- `argument_parser.h` and `argument_parser.cpp`
+- `pipeline_creator.h` and `pipeline_creator.cpp`
+- `video_processor.h` and `video_processor.cpp`
+- `video_capture.h` and `video_capture.cpp`
 
 ## Usage Example
 
