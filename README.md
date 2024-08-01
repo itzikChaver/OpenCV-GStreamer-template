@@ -51,21 +51,42 @@ Ensure you have these libraries installed on your system before proceeding with 
 1. Ensure your camera is connected and the device is correctly specified in `config/decklink_pipeline.txt`.
 
 2. Run the executable:
-    ```sh
-    ./OpenCV_GStreamer_template <input_name> [camera_number]
-    ```
-   - `<input_name>`: The name of the input source (video file, image file, or "decklink").
-   - `[camera_number]`: The camera number to be used for Decklink capture.
+
+    ### For running the project in default mode
+        ```sh
+        ./OpenCV_GStreamer_template
+        ```
+    - The project will run and use the default pipeline found in the gstreamer_pipeline.txt file, it can be changed to draw from a camera connected to the computer (for example a webcam).
+
+    ### For a capture card (for example Decklink)
+        ```sh
+        ./OpenCV_GStreamer_template <input_name> [camera_number]
+        ```
+    - `<input_name>`: The name of the input source (The name of the company that produces the capture card).
+    - `[camera_number]`: The camera number to be used for Decklink capture.
+
+    ### For a video file
+        ```sh
+        ./OpenCV_GStreamer_template <video_file_name> 
+        ```
+    - `<video_file_name>`: The name of the video file source.
+
+    ### For a image file
+        ```sh
+        ./OpenCV_GStreamer_template <image_file_name> 
+        ```
+    - `<image_file_name>`: The name of the image file source.
+
 
 ## Configuration
 
-The GStreamer pipeline configuration is stored in `config/decklink_pipeline.txt`. Modify this file to change the pipeline settings.
+The GStreamer pipeline configuration for decklink capture card is stored in `config/decklink_pipeline.txt`. 
 
 ### Default Pipeline Example
 
-Create a file named `gstreamer_pipeline.txt` with your default GStreamer pipeline. Example:
+Default GStreamer pipeline. Example:
 ```
-videotestsrc ! video/x-raw,width=640,height=480,framerate=30/1 ! videoconvert ! video/x-raw,format=BGR ! appsink
+videotestsrc pattern=ball ! videoconvert ! video/x-raw, format=BGR ! appsink
 ```
 
 ## Project Structure
