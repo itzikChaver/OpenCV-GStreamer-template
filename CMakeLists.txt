@@ -35,6 +35,9 @@ ENDMACRO()
 # Source files
 file(GLOB_RECURSE SRCS ${PROJECT_SOURCE_DIR}/src/*.cpp)
 
+# Header files
+file(GLOB_RECURSE HDRS ${PROJECT_SOURCE_DIR}/src/*.h)
+
 # using said macro.
 header_directories(INCLUDES ${PROJECT_SOURCE_DIR}/include/ h)
 

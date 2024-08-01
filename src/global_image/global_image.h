@@ -6,7 +6,8 @@
 #include <mutex>
 #include <condition_variable>
 
-namespace GlobalImage {
+namespace GlobalImage 
+{
     extern cv::Mat image; // Declare the global image variable
     extern std::mutex imageMutex; // Declare the mutex for image access
     extern std::condition_variable imageCondition; // Declare the condition variable for image access

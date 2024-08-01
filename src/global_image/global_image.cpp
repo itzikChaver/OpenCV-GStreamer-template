@@ -11,7 +11,8 @@ namespace GlobalImage
      * 
      * @param cap The new image to be set.
      */
-    void updateImage(const cv::Mat& cap) {
+    void updateImage(const cv::Mat& cap) 
+    {
         std::unique_lock<std::mutex> lock(imageMutex); // Lock the mutex before accessing the image
         image = cap.clone(); // Update image from the video capture
         imageCondition.notify_all(); // Notify all waiting threads that the image has been updated
@@ -24,7 +25,8 @@ namespace GlobalImage
      * 
      * @return A clone of the current global image.
      */
-    cv::Mat getImage() {
+    cv::Mat getImage() 
+    {
         std::unique_lock<std::mutex> lock(imageMutex); // Lock the mutex before accessing the image
         return image.clone(); // Return a clone of the current image
     }
