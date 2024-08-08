@@ -85,6 +85,26 @@ if(NOT HAVE_STD_FILESYSTEM)
     target_link_libraries(UsbController PRIVATE stdc++fs)
 endif()
 
+# Find CUDA package
+find_package(CUDA REQUIRED)
+if(CUDA_FOUND)
+    target_include_directories(${PROJECT_N} PRIVATE ${CUDA_INCLUDE_DIRS})
+    target_link_libraries(${PROJECT_N} PRIVATE ${CUDA_LIBRARIES})
+    message(STATUS "CUDA found and linked\n")
+else()
+    message(FATAL_ERROR "CUDA not found\n")
+endif()
+
+# Find VPI package
+find_package(VPI REQUIRED)
+if(VPI_FOUND)
+    target_include_directories(${PROJECT_N} PRIVATE ${VPI_INCLUDE_DIRS})
+    target_link_libraries(${PROJECT_N} PRIVATE ${VPI_LIBRARIES})
+    message(STATUS "VPI found and linked\n")
+else()
+    message(FATAL_ERROR "VPI not found\n")
+endif()
+
 # For OpenCV
 find_package(OpenCV REQUIRED)
 if(OpenCV_FOUND)
@@ -145,8 +165,6 @@ else()
     message(STATUS "OpenSSL SSL target not found.")
 endif()
 
-# For httplib
-message(STATUS "Searching for httplib...")
 find_package(OpenSSL REQUIRED COMPONENTS Crypto SSL)
 if (NOT OpenSSL_FOUND)
     message(FATAL_ERROR "OpenSSL components Crypto and SSL not found.\n")
@@ -154,32 +172,24 @@ else()
     message(STATUS "OpenSSL components Crypto and SSL found.\n")
 endif()
 
+# For httplib
+message(STATUS "\nSearching for httplib...")
 find_package(httplib)
 if (NOT httplib_FOUND)
-    message(FATAL_ERROR "httplib not found.\n")
+    message(FATAL_ERROR "httplib not found.")
 else()
     message(STATUS "httplib found.\n")
     target_link_libraries(${PROJECT_N} ${httplib_LIBS})
 endif()
 
-# For SPDLOG_LIBRARY
+# For spdlog
+message(STATUS "\nSearching for spdlog...")
 find_package(spdlog REQUIRED)
 if(spdlog_FOUND)
   target_link_libraries(${PROJECT_N} ${SPDLOG_LIBRARY})
   message(STATUS "spdlog found!")
 else()
-  message(STATUS "spdlog not found, attempting to install...")
-  set(EXTERNAL_PROJECT_NAME spdlog)
-  set(EXTERNAL_PROJECT_URL https://github.com/gabime/spdlog.git)
-  # Define the project and its properties
-  ExternalProject_Add(
-      spdlog
-      PREFIX ${DEPS_DIR}/${EXTERNAL_PROJECT_NAME}
-      GIT_REPOSITORY ${EXTERNAL_PROJECT_URL}
-      GIT_TAG v1.13.0 # Specify the desired release tag
-      BUILD_COMMAND ${CMAKE_COMMAND} --build . --config Release -- -j12  # This will build with parallel jobs
-      INSTALL_DIR ${CMAKE_INSTALL_PREFIX}  # Install to default CMake install path
-  )
+  message(FATAL_ERROR "spdlog not found.\n")
 endif()
 
 # For fmt
@@ -189,25 +199,7 @@ if(fmt_FOUND)
   target_link_libraries(${PROJECT_N} PUBLIC fmt::fmt)  # Link fmt publicly
   message(STATUS "fmt found!")
 else()
-  message(STATUS "fmtlib not found, attempting to install...")
-
-  # Run apt-get install command to install fmtlib
-  execute_process(
-      COMMAND sudo apt-get install -y libfmt-dev
-      RESULT_VARIABLE result
-  )
-
-  # Check the result of the apt-get install command
-  if(result)
-      message(FATAL_ERROR "Failed to install fmtlib. Re run with sudo or install it manually and re-run CMake.")
-  endif()
-
-  # Re-check for fmtlib after installation
-  find_package(fmt REQUIRED)
-  if(NOT fmt_FOUND)
-      message(FATAL_ERROR "fmtlib is required but could not be found.")
-  endif()
-  # Add error handling here if fmt is required
+    message(FATAL_ERROR "fmtlib not found.\n")
 endif()
 
 # For Libevent
@@ -217,43 +209,7 @@ if(Libevent_FOUND)
     target_link_libraries(${PROJECT_N} PUBLIC ${LIBEVENT_LIBRARIES})
     message(STATUS "Libevent found!")
 else()
-    message(STATUS "Libevent not found!")
-    message(STATUS "Installing Libevent...")
-    message(STATUS "Looking for OpenSSL...")
-    # Check if libssl-dev is installed
-    find_package(OpenSSL REQUIRED)
-    if(NOT OpenSSL_FOUND)
-        # If libssl-dev is not found, try to install it
-        message(STATUS "libssl-dev not found, attempting to install...")
-
-        # Run apt-get install command to install libssl-dev
-        execute_process(
-            COMMAND sudo apt-get install -y libssl-dev
-            RESULT_VARIABLE result
-        )
-
-        # Check the result of the apt-get install command
-        if(result)
-            message(FATAL_ERROR "Failed to install libssl-dev. re-run with sudo or install it manually and re-run CMake.")
-        endif()
-        # Re-check for libssl-dev after installation
-        find_package(OpenSSL REQUIRED)
-        if(NOT OpenSSL_FOUND)
-            message(FATAL_ERROR "libssl-dev is required but could not be found.")
-        endif()
-        set(EXTERNAL_PROJECT_NAME libEvent)
-        set(EXTERNAL_PROJECT_URL https://github.com/libevent/libevent.git)
-        # Define the project and its properties
-        ExternalProject_Add(
-            LibEvent
-            PREFIX ${DEPS_DIR}/${EXTERNAL_PROJECT_NAME}
-            GIT_REPOSITORY ${EXTERNAL_PROJECT_URL}
-            GIT_TAG release-2.1.12-stable  # Specify the desired release tag
-            BUILD_COMMAND ${CMAKE_COMMAND} --build . --config Release -- -j12  # This will build with parallel jobs
-            INSTALL_DIR ${CMAKE_INSTALL_PREFIX}  # Install to default CMake install path
-        )
-    endif()
-    # Add error handling here if Libevent is required
+    message(FATAL_ERROR "Libevent not found.\n")
 endif()
 
 add_compile_options(-fsigned-char)
